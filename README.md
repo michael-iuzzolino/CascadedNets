@@ -1,6 +1,6 @@
 # Improving Anytime Prediction with Parallel Cascaded Networks and a Temporal-Difference Loss
 
-This repository is the official implementation of [Improving Anytime Prediction with Parallel Cascaded Networks and a Temporal-Difference Loss](https://arxiv.org/abs/2102.09808). 
+This repository is the official implementation of [Improving Anytime Prediction with Parallel Cascaded Networks and a Temporal-Difference Loss](https://arxiv.org/abs/2102.09808) accepted to the 35th Conference on Neural Information Processing Systems (NeurIPS), 2021.
 
 ## Requirements
 
