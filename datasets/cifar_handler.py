@@ -41,11 +41,13 @@ class CIFAR100Handler(torchvision.datasets.CIFAR100):
     return img, target
 
 
-def get_transforms(dataset_key,
-                   mean,
-                   std,
-                   noise_type=None,
-                   noise_transform_all=False):
+def get_transforms(
+    dataset_key,
+    mean,
+    std,
+    noise_type=None,
+    noise_transform_all=False
+  ):
   """Create dataset transform list."""
   if dataset_key == "train":
     transforms_list = [
@@ -69,8 +71,16 @@ def get_transforms(dataset_key,
   return transforms
 
 
-def split_dev_set(dataset_src, mean, std, dataset_len, val_split, 
-                  split_idxs_root, load_previous_splits, verbose=False):
+def split_dev_set(
+    dataset_src, 
+    mean, 
+    std, 
+    dataset_len, 
+    val_split, 
+    split_idxs_root, 
+    load_previous_splits, 
+    verbose=False
+  ):
   """Load or create (and save) train/val split from dev set."""
   # Compute number of train / val splits
   n_val_samples = int(dataset_len * val_split)
@@ -87,7 +97,9 @@ def split_dev_set(dataset_src, mean, std, dataset_len, val_split,
   val_percent = int(val_split * 100)
   if ".json" not in split_idxs_root:
     idx_filepath = os.path.join(
-        split_idxs_root, f"{val_percent}-{100-val_percent}_val_split.json")
+        split_idxs_root, 
+        f"{val_percent}-{100-val_percent}_val_split.json"
+    )
   else:
     idx_filepath = split_idxs_root
 
@@ -135,17 +147,19 @@ def set_dataset_stats(dataset_name):
   return mean, std
 
 
-def build_dataset(root,
-                  dataset_name,
-                  dataset_key,
-                  mean,
-                  std,
-                  val_split=None,
-                  split_idxs_root=None,
-                  load_previous_splits=True,
-                  noise_type=None,
-                  noise_transform_all=False,
-                  verbose=True):
+def build_dataset(
+    root,
+    dataset_name,
+    dataset_key,
+    mean,
+    std,
+    val_split=None,
+    split_idxs_root=None,
+    load_previous_splits=True,
+    noise_type=None,
+    noise_transform_all=False,
+    verbose=True,
+  ):
   """Build dataset."""
   if verbose:
     print(f"Loading {dataset_name} {dataset_key} data...")
@@ -159,15 +173,22 @@ def build_dataset(root,
     assert False, f"{dataset_name} wrapper not implemented!"
 
   # Transforms
-  transforms = get_transforms(dataset_key, mean, std,
-                              noise_type, noise_transform_all)
+  transforms = get_transforms(
+    dataset_key, 
+    mean, 
+    std, 
+    noise_type, 
+    noise_transform_all,
+  )
 
   # Build dataset source
-  dataset_src = dataset_op(root=root,
-                           train=dataset_key == "train",
-                           transform=transforms,
-                           target_transform=None,
-                           download=True)
+  dataset_src = dataset_op(
+    root=root,
+    train=dataset_key == "train",
+    transform=transforms,
+    target_transform=None,
+    download=True,
+  )
 
   # Get number samples in dataset
   dataset_len = dataset_src.data.shape[0]
@@ -175,14 +196,16 @@ def build_dataset(root,
   # Split
   if dataset_key == "train":
     if val_split:
-      dataset_src = split_dev_set(dataset_src,
-                                  mean,
-                                  std,
-                                  dataset_len,
-                                  val_split,
-                                  split_idxs_root,
-                                  load_previous_splits,
-                                  verbose=verbose)
+      dataset_src = split_dev_set(
+        dataset_src,
+        mean,
+        std,
+        dataset_len,
+        val_split,
+        split_idxs_root,
+        load_previous_splits,
+        verbose=verbose
+      )
     else:
       dataset_src = dataset_src, None
 
@@ -196,13 +219,15 @@ def build_dataset(root,
   return dataset_src
 
 
-def create_datasets(root,
-                    dataset_name,
-                    val_split,
-                    load_previous_splits=False,
-                    split_idxs_root=None,
-                    noise_type=None,
-                    verbose=False):
+def create_datasets(
+    root,
+    dataset_name,
+    val_split,
+    load_previous_splits=False,
+    split_idxs_root=None,
+    noise_type=None,
+    verbose=False
+  ):
   """Create train, val, test datasets."""
 
   # Set stats
@@ -210,24 +235,27 @@ def create_datasets(root,
 
   # Build datasets
   train_dataset, val_dataset = build_dataset(
-      root,
-      dataset_name,
-      dataset_key="train",
-      mean=mean,
-      std=std,
-      val_split=val_split,
-      split_idxs_root=split_idxs_root,
-      load_previous_splits=load_previous_splits,
-      noise_type=noise_type,
-      verbose=verbose)
+    root,
+    dataset_name,
+    dataset_key="train",
+    mean=mean,
+    std=std,
+    val_split=val_split,
+    split_idxs_root=split_idxs_root,
+    load_previous_splits=load_previous_splits,
+    noise_type=noise_type,
+    verbose=verbose
+  )
 
-  test_dataset = build_dataset(root,
-                               dataset_name,
-                               dataset_key="test",
-                               mean=mean,
-                               std=std,
-                               noise_type=noise_type,
-                               load_previous_splits=load_previous_splits)
+  test_dataset = build_dataset(
+    root,
+    dataset_name,
+    dataset_key="test",
+    mean=mean,
+    std=std,
+    noise_type=noise_type,
+    load_previous_splits=load_previous_splits
+  )
 
   # Package
   dataset_dict = {

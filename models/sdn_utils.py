@@ -5,7 +5,13 @@ import numpy as np
 
 
 class IC_tau_handler:
-  def __init__(self, init_tau, tau_targets, epoch_asymptote=50, active=True):
+  def __init__(
+      self, 
+      init_tau, 
+      tau_targets, 
+      epoch_asymptote=50, 
+      active=True
+    ):
     self._init_tau = init_tau
     self._tau_targets = tau_targets
     self._epoch_asymptote = epoch_asymptote

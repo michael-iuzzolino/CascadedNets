@@ -61,13 +61,15 @@ class ResNet(nn.Module):
     # Head layer
     self.res_layer_count = 0
     self.inplanes = 64
-    self.layer0 = res_layers.HeadLayer(self.res_layer_count, 
-                                       self.inplanes,
-                                       self._norm_layer_op,
-                                       time_bn=self._time_bn,
-                                       IC_active=self._sdn_train_mode,
-                                       num_classes=self._num_classes,
-                                       **kwargs)
+    self.layer0 = res_layers.HeadLayer(
+      self.res_layer_count, 
+      self.inplanes,
+      self._norm_layer_op,
+      time_bn=self._time_bn,
+      IC_active=self._sdn_train_mode,
+      num_classes=self._num_classes,
+      **kwargs,
+    )
     self.res_layer_count += 1
 
     # Residual Layers
@@ -81,15 +83,19 @@ class ResNet(nn.Module):
     if self._multiple_fcs:
       fcs = []
       for i in range(self.timesteps):
-        fc_i = InternalClassifier(n_channels=512, 
-                                  num_classes=num_classes,
-                                  block_expansion=block.expansion)
+        fc_i = InternalClassifier(
+          n_channels=512, 
+          num_classes=num_classes,
+          block_expansion=block.expansion,
+        )
         fcs.append(fc_i)
       self.fcs = nn.ModuleList(fcs)
     else:
-      self.fc = InternalClassifier(n_channels=512, 
-                                   num_classes=num_classes,
-                                   block_expansion=block.expansion)
+      self.fc = InternalClassifier(
+        n_channels=512, 
+        num_classes=num_classes,
+        block_expansion=block.expansion,
+      )
     
     # Weight initialization
     for m in self.modules():
@@ -126,35 +132,41 @@ class ResNet(nn.Module):
       )
     layers = []
     layers.append(
-        block(self.res_layer_count,
-              self.inplanes,
-              planes,
-              stride,
-              downsample,
-              self._norm_layer_op,
-              tdl_alpha=tdl_alpha,
-              tdl_mode=tdl_mode,
-              noise_var=noise_var,
-              cascaded=self._cascaded,
-              cascaded_scheme=self._cascaded_scheme,
-              time_bn=self._time_bn,
-              num_classes=self._num_classes))
+        block(
+          self.res_layer_count,
+          self.inplanes,
+          planes,
+          stride,
+          downsample,
+          self._norm_layer_op,
+          tdl_alpha=tdl_alpha,
+          tdl_mode=tdl_mode,
+          noise_var=noise_var,
+          cascaded=self._cascaded,
+          cascaded_scheme=self._cascaded_scheme,
+          time_bn=self._time_bn,
+          num_classes=self._num_classes
+        )
+    )
     self.res_layer_count += 1
     
     self.inplanes = planes * block.expansion
     for i in range(1, blocks):
       layers.append(
-          block(self.res_layer_count,
-                self.inplanes,
-                planes,
-                norm_layer=self._norm_layer_op,
-                tdl_alpha=tdl_alpha,
-                tdl_mode=tdl_mode,
-                noise_var=noise_var,
-                cascaded=self._cascaded,
-                cascaded_scheme=self._cascaded_scheme,
-                time_bn=self._time_bn,
-                num_classes=self._num_classes))
+          block(
+            self.res_layer_count,
+            self.inplanes,
+            planes,
+            norm_layer=self._norm_layer_op,
+            tdl_alpha=tdl_alpha,
+            tdl_mode=tdl_mode,
+            noise_var=noise_var,
+            cascaded=self._cascaded,
+            cascaded_scheme=self._cascaded_scheme,
+            time_bn=self._time_bn,
+            num_classes=self._num_classes
+          )
+      )
       self.res_layer_count += 1
     return nn.Sequential(*layers)
 
@@ -172,8 +184,12 @@ class ResNet(nn.Module):
       for block in layer:
         block.set_time(t)
   
-  def set_target_inference_costs(self, normed_flops, target_inference_costs, 
-                                 use_all=False):
+  def set_target_inference_costs(
+      self, 
+      normed_flops, 
+      target_inference_costs, 
+      use_all=False
+    ):
     if use_all:
       print("Using all ICs!")
       selected_ICs = list(range(len(normed_flops)-1))
@@ -279,25 +295,49 @@ def make_resnet(arch, block, layers, pretrained, **kwargs):
 
 
 def resnet18(pretrained=False, **kwargs):
-  return make_resnet("resnet18", res_layers.BasicBlock, [2, 2, 2, 2],
-                     pretrained, **kwargs)
+  return make_resnet(
+    "resnet18", 
+    res_layers.BasicBlock, [2, 2, 2, 2],
+    pretrained, 
+    **kwargs,
+  )
 
 
 def resnet34(pretrained=False, **kwargs):
-  return make_resnet("resnet34", res_layers.BasicBlock, [3, 4, 6, 3],
-                     pretrained, **kwargs)
+  return make_resnet(
+    "resnet34", 
+    res_layers.BasicBlock, 
+    [3, 4, 6, 3],
+    pretrained, 
+    **kwargs,
+  )
 
 
 def resnet50(pretrained=False, **kwargs):
-  return make_resnet("resnet50", res_layers.Bottleneck, [3, 4, 6, 3],
-                     pretrained, **kwargs)
+  return make_resnet(
+    "resnet50", 
+    res_layers.Bottleneck, 
+    [3, 4, 6, 3],
+    pretrained, 
+    **kwargs,
+  )
 
 
 def resnet101(pretrained=False, **kwargs):
-  return make_resnet("resnet101", res_layers.Bottleneck, [3, 4, 23, 3],
-                     pretrained, **kwargs)
+  return make_resnet(
+    "resnet101", 
+    res_layers.Bottleneck, 
+    [3, 4, 23, 3],
+    pretrained, 
+    **kwargs,
+  )
 
 
 def resnet152(pretrained=False, **kwargs):
-  return make_resnet("resnet152", res_layers.Bottleneck, [3, 8, 36, 3],
-                     pretrained, **kwargs)
+  return make_resnet(
+    "resnet152", 
+    res_layers.Bottleneck, 
+    [3, 8, 36, 3],
+    pretrained, 
+    **kwargs,
+  )

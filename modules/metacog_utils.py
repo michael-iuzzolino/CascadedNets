@@ -57,8 +57,15 @@ def init_new_network(net, n_hidden, ckpt_init_dir, force_new_state_dict=True):
     net.load_state_dict(state_dict)
     
 
-def setup_network(input_dim, ckpt_init_dir, model, n_hidden,
-                  pretrained_path=None, gpu_index=0, force_new_state_dict=False):
+def setup_network(
+    input_dim, 
+    ckpt_init_dir, 
+    model, 
+    n_hidden,
+    pretrained_path=None, 
+    gpu_index=0, 
+    force_new_state_dict=False
+  ):
   net = model(input_dim=input_dim, hidden_dim=n_hidden)
   successful_load = False
   if pretrained_path is not None:

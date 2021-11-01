@@ -8,7 +8,13 @@ import torch.nn.functional as F
 class SequentialEvalLoop:
   """Evaluation loop for sequential model."""
 
-  def __init__(self, num_classes, keep_logits=False, keep_embeddings=False, verbose=False):
+  def __init__(
+      self, 
+      num_classes, 
+      keep_logits=False, 
+      keep_embeddings=False, 
+      verbose=False
+    ):
     self.num_classes = num_classes
     self.keep_logits = keep_logits
     self.keep_embeddings = keep_embeddings
@@ -195,20 +201,26 @@ def get_eval_loop(n_timesteps, num_classes, cascaded, flags,
                   verbose=False, tau_handler=None):
   """Retrieve sequential or cascaded eval function."""
   if flags.train_mode == "baseline":
-    eval_fxn = SequentialEvalLoop(num_classes, 
-                                  keep_logits, 
-                                  keep_embeddings, 
-                                  verbose)
+    eval_fxn = SequentialEvalLoop(
+      num_classes, 
+      keep_logits, 
+      keep_embeddings, 
+      verbose
+    )
   elif flags.train_mode == "cascaded":
-    eval_fxn = CascadedEvalLoop(n_timesteps, 
-                                num_classes, 
-                                keep_logits, 
-                                keep_embeddings, 
-                                verbose)
+    eval_fxn = CascadedEvalLoop(
+      n_timesteps, 
+      num_classes, 
+      keep_logits, 
+      keep_embeddings, 
+      verbose
+    )
   elif flags.train_mode == "cascaded_seq":
-    eval_fxn = CascadedEvalLoop(n_timesteps, 
-                                num_classes, 
-                                keep_logits, 
-                                keep_embeddings, 
-                                verbose)
+    eval_fxn = CascadedEvalLoop(
+      n_timesteps, 
+      num_classes, 
+      keep_logits, 
+      keep_embeddings, 
+      verbose
+    )
   return eval_fxn

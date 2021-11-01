@@ -143,7 +143,9 @@ def setup_args():
 
 
 def get_baseline_ckpt_path(save_root, args):
-  baseline_ckpt_roots = glob.glob(f"{os.path.dirname(save_root)}/std*seed_{args.random_seed}*")
+  baseline_ckpt_roots = glob.glob(
+    f"{os.path.dirname(save_root)}/std*seed_{args.random_seed}*"
+  )
   assert len(baseline_ckpt_roots), f"No baseline for seed {args.random_seed}"
   baseline_ckpt_root = baseline_ckpt_roots[0]
   final_ckpt_path = np.sort(glob.glob(f"{baseline_ckpt_root}/ckpts/*.pt"))[-1]
@@ -152,9 +154,11 @@ def get_baseline_ckpt_path(save_root, args):
 
 def setup_output_dir(args, save_args_to_root=True):
   if args.train_mode in ["baseline", "cascaded"]:
-    out_basename = (f"td({args.lambda_val}),{args.cascaded_scheme}" 
-                    if args.cascaded else 
-                    "std")
+    out_basename = (
+      f"td({args.lambda_val}),{args.cascaded_scheme}" 
+      if args.cascaded else 
+      "std"
+    )
   else:
     out_basename = f"{args.train_mode},td({args.lambda_val})"
   out_basename += f",lr_{args.learning_rate}"
@@ -170,10 +174,12 @@ def setup_output_dir(args, save_args_to_root=True):
   if args.tau_weighted_loss:
     out_basename += ",tau_weighted"
     
-  save_root = os.path.join(args.experiment_root,
-                           args.experiment_name,
-                           "experiments",
-                           out_basename)
+  save_root = os.path.join(
+    args.experiment_root,
+    args.experiment_name,
+    "experiments",
+    out_basename,
+  )
   if not os.path.exists(save_root):
     os.makedirs(save_root)
   print(f"Saving experiment to {save_root}")
@@ -249,12 +255,16 @@ def setup_model(data_handler, device, save_root, args):
   
   # Compute inference costs if ic_only / SDN
   if args.train_mode in ["ic_only", "sdn"]:
-    all_flops, normed_flops = sdn_utils.compute_inference_costs(data_handler, 
-                                                                model_dict, 
-                                                                args)
-    net.set_target_inference_costs(normed_flops, 
-                                   args.target_IC_inference_costs,
-                                   use_all=args.use_all_ICs)
+    all_flops, normed_flops = sdn_utils.compute_inference_costs(
+      data_handler, 
+      model_dict, 
+      args,
+    )
+    net.set_target_inference_costs(
+      normed_flops, 
+      args.target_IC_inference_costs,
+      use_all=args.use_all_ICs,
+    )
     
     if args.use_all_ICs:
       args.target_IC_inference_costs = normed_flops
@@ -346,9 +356,6 @@ def condition_model(save_root, args):
     tau_epoch_asymptote = 100
     tau_scheduling_active = args.tau_weighted_loss
 
-#     if args.train_mode == "baseline":
-#       net.turn_off_IC()
-  
   returns = {
       "optimizer_dict": optimizer_dict,
       "optimizer_init_op": optimizer_init_op,
@@ -365,9 +372,11 @@ def main(args):
   utils.make_reproducible(args.random_seed)
 
   # Set Device
-  device = torch.device(args.device
-                        if torch.cuda.is_available() and not args.use_cpu
-                        else "cpu")
+  device = torch.device(
+    args.device
+    if torch.cuda.is_available() and not args.use_cpu
+    else "cpu"
+  )
 
   # Setup output directory
   save_root = setup_output_dir(args)
@@ -382,18 +391,22 @@ def main(args):
   opts = condition_model(save_root, args)
   
   # Tau handler
-  tau_handler = sdn_utils.IC_tau_handler(init_tau=args.init_tau,
-                                         tau_targets=args.target_IC_inference_costs, 
-                                         epoch_asymptote=opts["tau_epoch_asymptote"],
-                                         active=opts["tau_scheduling_active"])
+  tau_handler = sdn_utils.IC_tau_handler(
+    init_tau=args.init_tau,
+    tau_targets=args.target_IC_inference_costs, 
+    epoch_asymptote=opts["tau_epoch_asymptote"],
+    active=opts["tau_scheduling_active"],
+  )
   
   # Init optimizer
   optimizer = opts["optimizer_init_op"](net.parameters(), **opts["optimizer_dict"])
 
   # Scheduler
-  lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
-                                                milestones=opts["lr_schedule_milestones"],
-                                                gamma=opts["lr_schedule_gamma"])
+  lr_scheduler = optim.lr_scheduler.MultiStepLR(
+    optimizer,
+    milestones=opts["lr_schedule_milestones"],
+    gamma=opts["lr_schedule_gamma"],
+  )
 
   # Criterion
   criterion = losses.categorical_cross_entropy
@@ -401,18 +414,22 @@ def main(args):
 
   # train and eval functions
   print("Setting up train and eval functions...")
-  train_fxn = train_handler.get_train_loop(net.timesteps,
-                                           data_handler.num_classes,
-                                           args,
-                                           tau_handler)
+  train_fxn = train_handler.get_train_loop(
+    net.timesteps,
+    data_handler.num_classes,
+    args,
+    tau_handler,
+  )
   
-  eval_fxn = eval_handler.get_eval_loop(net.timesteps,
-                                        data_handler.num_classes,
-                                        cascaded=args.cascaded,
-                                        flags=args,
-                                        keep_logits=False,
-                                        keep_embeddings=False,
-                                        tau_handler=tau_handler)
+  eval_fxn = eval_handler.get_eval_loop(
+    net.timesteps,
+    data_handler.num_classes,
+    cascaded=args.cascaded,
+    flags=args,
+    keep_logits=False,
+    keep_embeddings=False,
+    tau_handler=tau_handler,
+  )
   print("Complete.")
 
   # Metrics container
@@ -428,12 +445,14 @@ def main(args):
     for epoch_i in range(args.n_epochs):
       print(f"\nEpoch {epoch_i+1}/{args.n_epochs}")
       # Train net
-      train_loss, train_acc = train_fxn(net, 
-                                        loaders["train"], 
-                                        criterion, 
-                                        epoch_i,
-                                        optimizer, 
-                                        device)
+      train_loss, train_acc = train_fxn(
+        net, 
+        loaders["train"], 
+        criterion, 
+        epoch_i,
+        optimizer, 
+        device,
+      )
 
       # Log train metrics
       metrics["train"]["loss"].append((epoch_i, train_loss))

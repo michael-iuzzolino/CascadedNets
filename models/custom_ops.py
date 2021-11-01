@@ -16,21 +16,25 @@ from torch.nn.parameter import Parameter
 
 def conv3x3(planes, out_planes, stride=1):
   """3x3 convolution with padding."""
-  return nn.Conv2d(planes,
-                   out_planes,
-                   kernel_size=3,
-                   stride=stride,
-                   padding=1,
-                   bias=False)
+  return nn.Conv2d(
+    planes,
+    out_planes,
+    kernel_size=3,
+    stride=stride,
+    padding=1,
+    bias=False
+  )
 
 
 def conv1x1(planes, out_planes, stride=1):
   """1x1 convolution."""
-  return nn.Conv2d(planes,
-                   out_planes,
-                   kernel_size=1,
-                   stride=stride,
-                   bias=False)
+  return nn.Conv2d(
+    planes,
+    out_planes,
+    kernel_size=1,
+    stride=stride,
+    bias=False
+  )
 
 
 class _NormBase(nn.Module):
@@ -45,13 +49,15 @@ class _NormBase(nn.Module):
       "affine"
   ]
 
-  def __init__(self,
-               bn_opts,
-               num_features,
-               eps=1e-5,
-               momentum=0.1,
-               affine=True,
-               track_running_stats=True):
+  def __init__(
+      self,
+      bn_opts,
+      num_features,
+      eps=1e-5,
+      momentum=0.1,
+      affine=True,
+      track_running_stats=True
+    ):
     super(_NormBase, self).__init__()
     self.bn_opts = bn_opts
     self.num_features = num_features
@@ -111,8 +117,16 @@ class _NormBase(nn.Module):
     return ("{num_features}, eps={eps}, momentum={momentum}, affine={affine}, "
             "track_running_stats={track_running_stats}".format(**self.__dict__))
 
-  def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict,
-                            missing_keys, unexpected_keys, error_msgs):
+  def _load_from_state_dict(
+      self, 
+      state_dict, 
+      prefix, 
+      local_metadata, 
+      strict,
+      missing_keys, 
+      unexpected_keys, 
+      error_msgs
+    ):
     version = local_metadata.get("version", None)
 
     if (version is None or version < 2) and self.track_running_stats:
@@ -122,10 +136,15 @@ class _NormBase(nn.Module):
       if num_batches_tracked_key not in state_dict:
         state_dict[num_batches_tracked_key] = torch.tensor(0, dtype=torch.long)
 
-    super(_NormBase,
-          self)._load_from_state_dict(state_dict, prefix, local_metadata,
-                                      strict, missing_keys, unexpected_keys,
-                                      error_msgs)
+    super(_NormBase, self)._load_from_state_dict(
+      state_dict, 
+      prefix, 
+      local_metadata,
+      strict, 
+      missing_keys, 
+      unexpected_keys,
+      error_msgs,
+    )
 
 
 class _BatchNorm(_NormBase):
@@ -134,14 +153,21 @@ class _BatchNorm(_NormBase):
   Adapted from https://pytorch.org/docs/stable/_modules/torch/nn/modules/batchnorm.html#BatchNorm2d #pylint: disable=line-too-long
   """
 
-  def __init__(self,  # pylint: disable=useless-super-delegation
-               num_features,
-               eps=1e-5,
-               momentum=0.1,
-               affine=True,
-               track_running_stats=True):
-    super(_BatchNorm, self).__init__(num_features, eps, momentum, affine,
-                                     track_running_stats)
+  def __init__(
+      self,  # pylint: disable=useless-super-delegation
+      num_features,
+      eps=1e-5,
+      momentum=0.1,
+      affine=True,
+      track_running_stats=True
+    ):
+    super(_BatchNorm, self).__init__(
+      num_features, 
+      eps, 
+      momentum, 
+      affine,
+      track_running_stats
+    )
 
   def forward(self, x, t):
     # Limit t to max
@@ -181,9 +207,16 @@ class _BatchNorm(_NormBase):
       weight = weight[t]
       bias = bias[t]
 
-    return F.batch_norm(x, running_mean, running_var, weight, bias,
-                        self.training or not self.track_running_stats,
-                        exponential_average_factor, self.eps)
+    return F.batch_norm(
+      x, 
+      running_mean, 
+      running_var, 
+      weight, 
+      bias,
+      self.training or not self.track_running_stats,
+      exponential_average_factor, 
+      self.eps
+    )
 
 
 class BatchNorm2d(_BatchNorm):

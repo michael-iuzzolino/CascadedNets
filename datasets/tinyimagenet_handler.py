@@ -58,12 +58,14 @@ class EnforceShape:
 
 
 class TinyImagenetDataset(Dataset):
-  def __init__(self,
-               root,
-               dataset_key,
-               val_split=None,
-               split_idxs_root=None,
-               load_previous_splits=True):
+  def __init__(
+      self,
+      root,
+      dataset_key,
+      val_split=None,
+      split_idxs_root=None,
+      load_previous_splits=True
+    ):
     self.root = os.path.join(root, "TinyImageNet/data/")
     self.dataset_key = dataset_key
     if not os.path.exists(self.root):
@@ -82,7 +84,11 @@ class TinyImagenetDataset(Dataset):
     else:
       self.dataset_path = os.path.join(self.root, "train")
     
-    self._setup_dataset_paths(val_split, split_idxs_root, load_previous_splits)
+    self._setup_dataset_paths(
+      val_split, 
+      split_idxs_root, 
+      load_previous_splits,
+    )
     
   def _create_label_lookup(self):
     path = os.path.join(self.root, "wnids.txt")
@@ -101,8 +107,12 @@ class TinyImagenetDataset(Dataset):
         key_i += 1
     return lookup
 
-  def _setup_dataset_paths(self, val_split, split_idxs_root,
-                           load_previous_splits):
+  def _setup_dataset_paths(
+      self, 
+      val_split, 
+      split_idxs_root,
+      load_previous_splits
+    ):
     # Load paths
     self.img_paths = glob.glob(f"{self.dataset_path}/*/*")
 
@@ -142,10 +152,15 @@ class TinyImagenetDataset(Dataset):
   
   def _setup_transforms(self):
     if self.dataset_key == "train":
-      xform_list = [T.RandomResizedCrop(_RESIZED_CROP_DIM), 
-                    T.RandomHorizontalFlip(p=0.5)]
+      xform_list = [
+        T.RandomResizedCrop(_RESIZED_CROP_DIM), 
+        T.RandomHorizontalFlip(p=0.5),
+      ]
     else:
-      xform_list = [T.Resize(_RESIZE_DIM), T.CenterCrop(_CROP_DIM)]
+      xform_list = [
+        T.Resize(_RESIZE_DIM), 
+        T.CenterCrop(_CROP_DIM),
+      ]
 
     xform_list += [
         T.ToTensor(),
@@ -175,15 +190,25 @@ class TinyImagenetDataset(Dataset):
     return img, y  #, label
   
   
-def create_datasets(data_root, val_split, split_idxs_root, *args, **kwargs):
+def create_datasets(
+    data_root, 
+    val_split, 
+    split_idxs_root, 
+    *args, 
+    **kwargs
+  ):
   dataset_dict = {}
   for dataset_key in ["train", "val", "test"]:
     print(f"Loading {dataset_key} data...")
     if dataset_key == "test":
       dataset_i = TinyImagenetDataset(data_root, dataset_key)
     else:
-      dataset_i = TinyImagenetDataset(data_root, dataset_key,
-                                      val_split, split_idxs_root)
+      dataset_i = TinyImagenetDataset(
+        data_root, 
+        dataset_key,
+        val_split, 
+        split_idxs_root,
+      )
     
     dataset_dict[dataset_key] = dataset_i
   

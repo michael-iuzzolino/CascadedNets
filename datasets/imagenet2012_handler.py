@@ -144,7 +144,10 @@ class ImagenetDataset(Dataset):
 
   def _setup_transforms(self):
     if self.dataset_key == 'train':
-      xform_list = [T.RandomResizedCrop(224), T.RandomHorizontalFlip(p=0.5)]
+      xform_list = [
+        T.RandomResizedCrop(224), 
+        T.RandomHorizontalFlip(p=0.5),
+      ]
     else:
       xform_list = [T.Resize(256), T.CenterCrop(224)]
 

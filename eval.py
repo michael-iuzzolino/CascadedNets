@@ -356,21 +356,25 @@ def main(args):
     else:
       n_timesteps = net.timesteps
     
-    eval_fxn = eval_handler.get_eval_loop(n_timesteps,
-                                          data_handler.num_classes,
-                                          cascaded=args.cascaded,
-                                          flags=args,
-                                          keep_logits=args.keep_logits,
-                                          keep_embeddings=args.keep_embeddings,
-                                          tau_handler=tau_handler)
+    eval_fxn = eval_handler.get_eval_loop(
+      n_timesteps,
+      data_handler.num_classes,
+      cascaded=args.cascaded,
+      flags=args,
+      keep_logits=args.keep_logits,
+      keep_embeddings=args.keep_embeddings,
+      tau_handler=tau_handler,
+    )
 
     criterion = losses.categorical_cross_entropy
 
-    test_loss, test_acc, logged_data = eval_fxn(net, 
-                                                loader, 
-                                                criterion, 
-                                                0, 
-                                                args.device)
+    test_loss, test_acc, logged_data = eval_fxn(
+      net, 
+      loader, 
+      criterion, 
+      0, 
+      args.device,
+    )
 
     if args.train_mode == "baseline":
       final_mean_test_acc = np.mean(test_acc)

@@ -15,14 +15,16 @@ from models import model_utils
 class DenseNet(nn.Module):
   """Densenet."""
 
-  def __init__(self,
-               name,
-               block,
-               block_arch,
-               growth_rate=12,
-               reduction=0.5,
-               num_classes=10,
-               **kwargs):
+  def __init__(
+      self,
+      name,
+      block,
+      block_arch,
+      growth_rate=12,
+      reduction=0.5,
+      num_classes=10,
+      **kwargs
+    ):
     """Initialize dense net."""
     super(DenseNet, self).__init__()
 
@@ -35,57 +37,92 @@ class DenseNet(nn.Module):
     self._norm_layer_op = self._setup_bn_op(**kwargs)
 
     # Build network
-    self._build_net(block, block_arch, growth_rate,
-                    reduction, num_classes, **kwargs)
+    self._build_net(
+      block, 
+      block_arch, 
+      growth_rate,
+      reduction, 
+      num_classes, 
+      **kwargs
+    )
 
-  def _build_net(self,
-                 block,
-                 block_arch,
-                 growth_rate,
-                 reduction,
-                 num_classes,
-                 **kwargs):
+  def _build_net(
+      self,
+      block,
+      block_arch,
+      growth_rate,
+      reduction,
+      num_classes,
+      **kwargs
+    ):
     self.layers = []
         
     # Set number of input channels
     in_planes = kwargs.get("n_channels", 3)
     
     num_planes = 2 * growth_rate
-    self.conv1 = nn.Conv2d(in_planes, num_planes, kernel_size=3, 
-                           padding=1, bias=False)
+    self.conv1 = nn.Conv2d(
+      in_planes, 
+      num_planes, 
+      kernel_size=3, 
+      padding=1, 
+      bias=False,
+      )
 
-    self.dense1 = self._make_dense_layers(block, num_planes,
-                                          block_arch[0], **kwargs)
+    self.dense1 = self._make_dense_layers(
+      block, 
+      num_planes,
+      block_arch[0], 
+      **kwargs
+    )
     num_planes += block_arch[0] * growth_rate
     out_planes = int(np.floor(num_planes * reduction))
-    self.trans1 = dense_blocks.Transition(num_planes,
-                                          out_planes,
-                                          norm_layer=self._norm_layer_op,
-                                          **kwargs)
+    self.trans1 = dense_blocks.Transition(
+      num_planes,
+      out_planes,
+      norm_layer=self._norm_layer_op,
+      **kwargs,
+    )
     num_planes = out_planes
 
-    self.dense2 = self._make_dense_layers(block, num_planes,
-                                          block_arch[1], **kwargs)
+    self.dense2 = self._make_dense_layers(
+      block, 
+      num_planes,
+      block_arch[1], 
+      **kwargs,
+    )
     num_planes += block_arch[1] * growth_rate
     out_planes = int(np.floor(num_planes * reduction))
-    self.trans2 = dense_blocks.Transition(num_planes,
-                                          out_planes,
-                                          norm_layer=self._norm_layer_op,
-                                          **kwargs)
+    self.trans2 = dense_blocks.Transition(
+      num_planes,
+      out_planes,
+      norm_layer=self._norm_layer_op,
+      **kwargs,
+    )
     num_planes = out_planes
 
-    self.dense3 = self._make_dense_layers(block, num_planes,
-                                          block_arch[2], **kwargs)
+    self.dense3 = self._make_dense_layers(
+      block, 
+      num_planes,
+      block_arch[2], 
+      **kwargs,
+    )
     num_planes += block_arch[2] * growth_rate
     out_planes = int(np.floor(num_planes * reduction))
-    self.trans3 = dense_blocks.Transition(num_planes,
-                                          out_planes,
-                                          norm_layer=self._norm_layer_op,
-                                          **kwargs)
+    self.trans3 = dense_blocks.Transition(
+      num_planes,
+      out_planes,
+      norm_layer=self._norm_layer_op,
+      **kwargs,
+    )
     num_planes = out_planes
 
-    self.dense4 = self._make_dense_layers(block, num_planes,
-                                          block_arch[3], **kwargs)
+    self.dense4 = self._make_dense_layers(
+      block, 
+      num_planes,
+      block_arch[3], 
+      **kwargs,
+    )
     num_planes += block_arch[3] * growth_rate
 
     self.bn = self._norm_layer_op(num_planes)
@@ -98,10 +135,12 @@ class DenseNet(nn.Module):
   def _make_dense_layers(self, block, in_planes, n_blocks, **kwargs):
     layers = []
     for _ in range(n_blocks):
-      block_i = block(in_planes,
-                      self.growth_rate,
-                      norm_layer=self._norm_layer_op,
-                      **kwargs)
+      block_i = block(
+        in_planes,
+        self.growth_rate,
+        norm_layer=self._norm_layer_op,
+        **kwargs,
+      )
       self.layers.append(block_i)
       layers.append(block_i)
       in_planes += self.growth_rate
@@ -175,22 +214,46 @@ def densenet121(pretrained=False, **kwargs):
 
 
 def densenet161(pretrained=False, **kwargs):
-  return make_densenet("densenet161", dense_blocks.Bottleneck, [6, 12, 36, 24],
-                       pretrained, growth_rate=48, **kwargs)
+  return make_densenet(
+    "densenet161", 
+    dense_blocks.Bottleneck, 
+    [6, 12, 36, 24],
+    pretrained, 
+    growth_rate=48, 
+    **kwargs
+  )
 
 
 def densenet169(pretrained=False, **kwargs):
-  return make_densenet("densenet169", dense_blocks.Bottleneck, [6, 12, 32, 32],
-                       pretrained, growth_rate=32, **kwargs)
+  return make_densenet(
+    "densenet169", 
+    dense_blocks.Bottleneck, 
+    [6, 12, 32, 32],
+    pretrained, 
+    growth_rate=32,
+    **kwargs,
+  )
 
 
 def densenet201(pretrained=False, **kwargs):
-  return make_densenet("densenet201", dense_blocks.Bottleneck, [6, 12, 48, 32],
-                       pretrained, growth_rate=32, **kwargs)
+  return make_densenet(
+    "densenet201", 
+    dense_blocks.Bottleneck, 
+    [6, 12, 48, 32],
+    pretrained, 
+    growth_rate=32, 
+    **kwargs,
+  )
 
 
 def densenet_cifar(pretrained=False, **kwargs):
   block_arch = [6, 12, 24, 16]
   growth_rate = 16
-  return make_densenet("densenet121_cifar", dense_blocks.Bottleneck, block_arch,
-                       pretrained, growth_rate=growth_rate, **kwargs)
+  return make_densenet(
+    "densenet121_cifar", 
+    dense_blocks.Bottleneck, 
+    block_arch,
+    pretrained, 
+    growth_rate=growth_rate, 
+    **kwargs,
+  )

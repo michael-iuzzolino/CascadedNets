@@ -20,19 +20,23 @@ class HeadLayer(nn.Module):
     inplanes = kwargs.get("n_channels", 3)
 
     if kwargs.get("imagenet", False):
-      self.conv1 = nn.Conv2d(inplanes,
-                             planes,
-                             kernel_size=7,
-                             stride=2,
-                             padding=3,
-                             bias=False)
+      self.conv1 = nn.Conv2d(
+        inplanes,
+        planes,
+        kernel_size=7,
+        stride=2,
+        padding=3,
+        bias=False,
+      )
     else:
-      self.conv1 = nn.Conv2d(inplanes,
-                             planes,
-                             kernel_size=3,
-                             stride=1,
-                             padding=1,
-                             bias=False)
+      self.conv1 = nn.Conv2d(
+        inplanes,
+        planes,
+        kernel_size=3,
+        stride=1,
+        padding=1,
+        bias=False,
+      )
 
     self.bn1 = norm_layer(planes)
     self.relu = nn.ReLU(inplace=True)
@@ -66,14 +70,16 @@ class BasicBlock(nn.Module):
   """Basic resnet block."""
   expansion = 1
 
-  def __init__(self,
-               layer_i,
-               inplanes,
-               planes,
-               stride=1,
-               downsample=None,
-               norm_layer=None,
-               **kwargs):
+  def __init__(
+      self,
+      layer_i,
+      inplanes,
+      planes,
+      stride=1,
+      downsample=None,
+      norm_layer=None,
+      **kwargs,
+    ):
     """Initialize basic block."""
     super(BasicBlock, self).__init__()
     
@@ -149,14 +155,16 @@ class Bottleneck(nn.Module):
   """Bottleneck Block."""
   expansion = 4
 
-  def __init__(self,
-               layer_i,
-               inplanes,
-               planes,
-               stride=1,
-               downsample=None,
-               norm_layer=None,
-               **kwargs):
+  def __init__(
+      self,
+      layer_i,
+      inplanes,
+      planes,
+      stride=1,
+      downsample=None,
+      norm_layer=None,
+      **kwargs,
+    ):
     """Initialize bottleneck block."""
     super(Bottleneck, self).__init__()
     base_width = 64

@@ -46,11 +46,13 @@ def add_gaussian_blur(x, k_size=3):
   return x.squeeze()
 
 
-def add_patch(tensor,
-              noise_location,
-              patch_type=False,
-              min_size=16,
-              max_size=32):
+def add_patch(
+    tensor,
+    noise_location,
+    patch_type=False,
+    min_size=16,
+    max_size=32
+  ):
   """Add focus/occluding patch."""
   _, h, w = tensor.shape
   if noise_location == "random":
@@ -135,10 +137,12 @@ def shift_image(img, shift_at_t, dim=32):
   padded_img, (x1, y1) = pad_image(img, padding=padding)
 
   # Crop with offset
-  cropped_img = crop_image(padded_img,
-                           top_left=(x1, y1),
-                           offset=shift_at_t,
-                           dim=dim)
+  cropped_img = crop_image(
+    padded_img,
+    top_left=(x1, y1),
+    offset=shift_at_t,
+    dim=dim,
+  )
   return cropped_img
 
 
@@ -155,10 +159,12 @@ def rotate_image(img, max_rot_angle, dim=32):
   rotated_img = torch.tensor(x_np).permute(2, 0, 1)
 
   # Crop image
-  cropped_img = crop_image(rotated_img,
-                           top_left=(x1, y1),
-                           offset=(0, 0),
-                           dim=dim)
+  cropped_img = crop_image(
+    rotated_img,
+    top_left=(x1, y1),
+    offset=(0, 0),
+    dim=dim,
+  )
   return cropped_img
 
 
@@ -169,10 +175,12 @@ def translate_image(img, shift_at_t, dim=32):
   padded_img, (x1, y1) = pad_image(img, padding=padding)
 
   # Crop with offset
-  cropped_img = crop_image(padded_img,
-                           top_left=(x1, y1),
-                           offset=shift_at_t,
-                           dim=dim)
+  cropped_img = crop_image(
+    padded_img,
+    top_left=(x1, y1),
+    offset=shift_at_t,
+    dim=dim,
+  )
   return cropped_img
 
 
@@ -235,12 +243,14 @@ class RandomWalkGenerator:
 class PerlinNoise(object):
   """Perlin noise handler."""
 
-  def __init__(self,
-               half=False,
-               half_dim="height",
-               frequency=5,
-               proportion=0.4,
-               b_w=True):
+  def __init__(
+      self,
+      half=False,
+      half_dim="height",
+      frequency=5,
+      proportion=0.4,
+      b_w=True
+    ):
     """Initializes PerlinNoise generator."""
 
     self.half = half
@@ -358,12 +368,14 @@ class FocusBlur:
 class NoiseHandler:
   """Noise handler."""
 
-  def __init__(self,
-               noise_type,
-               n_total_samples=1000,
-               n_total_timesteps=0,
-               n_timesteps_per_item=0,
-               n_transition_steps=0):
+  def __init__(
+      self,
+      noise_type,
+      n_total_samples=1000,
+      n_total_timesteps=0,
+      n_timesteps_per_item=0,
+      n_transition_steps=0
+    ):
     """Initializes noise handler."""
     self.noise_type = noise_type
     self.n_total_samples = n_total_samples
@@ -377,17 +389,21 @@ class NoiseHandler:
 
     self._random_walker = None
     if noise_type == "translation":
-      self._random_walker = RandomWalkGenerator(n_total_timesteps,
-                                                n_total_samples)
+      self._random_walker = RandomWalkGenerator(
+        n_total_timesteps,
+        n_total_samples
+      )
 
   def __call__(self, x_src, sample_i=None, t=None):
     x = x_src.clone()
     if self.noise_type in ["occlusion", "focus"]:
-      x_noised = add_patch(x,
-                           noise_location="random",
-                           patch_type=self.noise_type,
-                           min_size=self._min_size,
-                           max_size=self._max_size)
+      x_noised = add_patch(
+        x,
+        noise_location="random",
+        patch_type=self.noise_type,
+        min_size=self._min_size,
+        max_size=self._max_size,
+      )
     elif self.noise_type == "resolution":
       x_noised = FocusBlur()(x)
     elif self.noise_type == "Perlin":

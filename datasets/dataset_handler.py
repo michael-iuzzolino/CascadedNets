@@ -9,16 +9,18 @@ from datasets import imagenet2012_handler
 class DataHandler:
   """Handler for datasets."""
 
-  def __init__(self,
-               dataset_name,
-               data_root,
-               val_split=0.1,
-               test_split=0.1,
-               split_idxs_root="split_idxs",
-               noise_type=None,
-               load_previous_splits=True,
-               verbose=True, 
-               **kwargs):
+  def __init__(
+      self,
+      dataset_name,
+      data_root,
+      val_split=0.1,
+      test_split=0.1,
+      split_idxs_root="split_idxs",
+      noise_type=None,
+      load_previous_splits=True,
+      verbose=True, 
+      **kwargs
+    ):
     """Initialize dataset handler."""
     self.dataset_name = dataset_name
     self.data_root = data_root
@@ -37,8 +39,10 @@ class DataHandler:
       os.makedirs(split_idxs_root)
 
     if split_idxs_root and val_split:
-      self.split_idxs_root = self._build_split_idx_root(split_idxs_root,
-                                                        dataset_name)
+      self.split_idxs_root = self._build_split_idx_root(
+        split_idxs_root,
+        dataset_name
+      )
     else:
       self.split_idxs_root = None
     
@@ -103,17 +107,20 @@ class DataHandler:
     """Build dataset."""
     if "cifar" in self.dataset_name.lower():
       dataset_dict = cifar_handler.create_datasets(
-          self.data_root,
-          dataset_name=self.dataset_name,
-          val_split=self.val_split,
-          split_idxs_root=self.split_idxs_root,
-          noise_type=self.noise_type,
-          load_previous_splits=self.load_previous_splits,
-          verbose=self._verbose)
+        self.data_root,
+        dataset_name=self.dataset_name,
+        val_split=self.val_split,
+        split_idxs_root=self.split_idxs_root,
+        noise_type=self.noise_type,
+        load_previous_splits=self.load_previous_splits,
+        verbose=self._verbose
+      )
     elif self.dataset_name.lower() == "tinyimagenet":
-      dataset_dict = tinyimagenet_handler.create_datasets(self.data_root,
-                                                          self.val_split,
-                                                          self.split_idxs_root)
+      dataset_dict = tinyimagenet_handler.create_datasets(
+        self.data_root,
+        self.val_split,
+        self.split_idxs_root
+      )
     elif self.dataset_name.lower() == "imagenet2012":
       # Build path dataframe
       path_df = imagenet2012_handler.build_path_df(self.data_root)
@@ -121,25 +128,31 @@ class DataHandler:
       
       # Subset data
       if "imagenet_params" in self._kwargs:
-        path_df = imagenet2012_handler.subset_path_df(path_df, 
-                                                      self._kwargs["imagenet_params"])
+        path_df = imagenet2012_handler.subset_path_df(
+          path_df, 
+          self._kwargs["imagenet_params"]
+        )
       
       # Set number of classes!
       self.num_classes = path_df.class_lbl.unique().shape[0]
       print(f"# Classes: {self.num_classes}")
       
       # Build dataset dict
-      dataset_dict = imagenet2012_handler.create_datasets(path_df, 
-                                                          self.val_split, 
-                                                          self.test_split,
-                                                          self.split_idxs_root)
+      dataset_dict = imagenet2012_handler.create_datasets(
+        path_df, 
+        self.val_split, 
+        self.test_split,
+        self.split_idxs_root
+      )
     
     return dataset_dict
 
-  def build_loader(self,
-                   dataset_key,
-                   flags,
-                   dont_shuffle_train=False):
+  def build_loader(
+      self,
+      dataset_key,
+      flags,
+      dont_shuffle_train=False
+    ):
     """Build dataset loader."""
 
     # Get dataset source

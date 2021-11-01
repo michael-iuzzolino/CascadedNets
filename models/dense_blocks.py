@@ -18,12 +18,24 @@ class Bottleneck(nn.Module):
     self.relu = nn.ReLU()
 
     self.bn1 = norm_layer(in_planes)
-    self.conv1 = nn.Conv2d(in_planes, mid_plane, kernel_size=1,
-                           stride=1, padding=0, bias=False)
+    self.conv1 = nn.Conv2d(
+      in_planes, 
+      mid_plane, 
+      kernel_size=1,
+      stride=1, 
+      padding=0, 
+      bias=False
+    )
 
     self.bn2 = norm_layer(mid_plane)
-    self.conv2 = nn.Conv2d(mid_plane, growth_rate, kernel_size=3,
-                           stride=1, padding=1, bias=False)
+    self.conv2 = nn.Conv2d(
+      mid_plane, 
+      growth_rate, 
+      kernel_size=3,
+      stride=1, 
+      padding=1, 
+      bias=False,
+    )
 
     if self._cascaded:
       tdl_mode = kwargs.get("tdl_mode", "OSD")
@@ -60,8 +72,14 @@ class Transition(nn.Module):
 
     self.bn = norm_layer(in_planes)
     self.relu = nn.ReLU()
-    self.conv = nn.Conv2d(in_planes, out_planes, kernel_size=1,
-                          stride=1, padding=0, bias=False)
+    self.conv = nn.Conv2d(
+      in_planes, 
+      out_planes, 
+      kernel_size=1,
+      stride=1, 
+      padding=0, 
+      bias=False,
+    )
 
   def set_time(self, t):
     self.t = t
