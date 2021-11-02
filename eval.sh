@@ -19,7 +19,7 @@ TDL_ALPHA=0.9
 NOISE_VAR=0.0  # Used for noise kernel only
 N_TIMESTEPS=70  # Used for EWS kernel only
 
-DEVICE=1
+DEVICE=0
 KEEP_LOGITS=true
 KEEP_EMBEDDINGS=true
 FORCE_OVERWRITE=true
