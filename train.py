@@ -58,6 +58,8 @@ def setup_args():
   parser.add_argument("--train_mode", type=str, 
                       default="baseline",
                       help="Train mode: baseline, ic_only, sdn")
+  parser.add_argument("--use_imagenet_pretrained_weights", action="store_true", default=False,
+                      help="Use pretrained imagenet weights")
   parser.add_argument("--bn_time_affine", action="store_true", default=False,
                       help="Use temporal affine transforms in BatchNorm")
   parser.add_argument("--bn_time_stats", action="store_true", default=False,
@@ -238,7 +240,7 @@ def setup_model(data_handler, device, args, save_root=""):
           "temporal_stats": args.bn_time_stats,
       },
       "imagenet": args.dataset_name == "ImageNet2012",
-      "imagenet_pretrained": True, # args.dataset_name == "ImageNet2012",
+      "imagenet_pretrained": args.dataset_name == "ImageNet2012" and args.use_imagenet_pretrained_weights,
       "n_channels": 1 if args.dataset_name == "FashionMNIST" else 3
   }
 
