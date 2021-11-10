@@ -10,7 +10,6 @@
 """
 import functools
 import numpy as np
-import torch
 import torch.nn as nn
 from collections import OrderedDict
 from torchvision.models.utils import load_state_dict_from_url
@@ -275,6 +274,12 @@ def make_resnet(arch, block, layers, pretrained, **kwargs):
       if k.startswith("conv1") or k.startswith("bn1"):
         k = f"layer0.{k}"
       
+      # Fix fc.fc missing weight
+      if k == "fc.weight":
+        k = f"fc.{k}"
+      if k == "fc.bias":
+        k = f"fc.{k}"
+      
       # Inflate batch norm along time dimension if cascaded model
       if kwargs["cascaded"] and "running_" in k:
         v = v.unsqueeze(dim=0).repeat(model.timesteps, 1)
@@ -282,10 +287,11 @@ def make_resnet(arch, block, layers, pretrained, **kwargs):
     
     # Load imagenet state dict into our model
     model.load_state_dict(new_dict)
-    
+    print("Success: Loaded pretrained state dict!")
+
     # Replace final layer to correct # class mapping
     num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, num_classes)
+    model.fc = InternalClassifier(num_ftrs, num_classes)  # nn.Linear(num_ftrs, num_classes)
   else: 
     model = ResNet(arch, block, layers, **kwargs)
     if pretrained:

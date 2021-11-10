@@ -3,6 +3,7 @@ import torch
 from collections import OrderedDict
 
 
+
 def apply_weight_decay(net, weight_decay):
   """Apply weight decay."""
   if weight_decay == 0:

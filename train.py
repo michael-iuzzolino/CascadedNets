@@ -219,7 +219,7 @@ def setup_dataset(args):
   return data_handler, loaders
 
 
-def setup_model(data_handler, device, save_root, args):
+def setup_model(data_handler, device, args, save_root=""):
   # Model
   model_dict = {
       "seed": args.random_seed,
@@ -238,7 +238,7 @@ def setup_model(data_handler, device, save_root, args):
           "temporal_stats": args.bn_time_stats,
       },
       "imagenet": args.dataset_name == "ImageNet2012",
-      "imagenet_pretrained": False, # args.dataset_name == "ImageNet2012",
+      "imagenet_pretrained": True, # args.dataset_name == "ImageNet2012",
       "n_channels": 1 if args.dataset_name == "FashionMNIST" else 3
   }
 
@@ -270,9 +270,10 @@ def setup_model(data_handler, device, save_root, args):
       args.target_IC_inference_costs = normed_flops
 
   # Save model config
-  model_dict["model_key"] = args.model_key
-  utils.save_model_config(model_dict, save_root, args.debug)
-  
+  if save_root:
+    model_dict["model_key"] = args.model_key
+    utils.save_model_config(model_dict, save_root, args.debug)
+    
   return net
 
 
@@ -379,14 +380,15 @@ def main(args):
   )
 
   # Setup output directory
-  save_root = setup_output_dir(args)
+  #save_root = setup_output_dir(args)
 
   # Setup dataset loaders
   data_handler, loaders = setup_dataset(args)
   
   # Setup model
-  net = setup_model(data_handler, device, save_root, args)
-  
+  save_root = ""
+  net = setup_model(data_handler, device, args, save_root=save_root)
+
   # Condition model and get handler opts
   opts = condition_model(save_root, args)
   

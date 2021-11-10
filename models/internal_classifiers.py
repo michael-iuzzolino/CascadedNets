@@ -5,7 +5,7 @@ import torch.nn as nn
 class InternalClassifier(nn.Module):
   def __init__(self, n_channels, num_classes, block_expansion=1):
     super().__init__()
-    
+    self.in_features = n_channels
     self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
     self.fc = nn.Linear(n_channels * block_expansion, num_classes)
   
