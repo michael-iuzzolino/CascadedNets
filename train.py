@@ -141,6 +141,9 @@ def setup_args():
   
   if args.train_mode == "cascaded":
     args.cascaded = True
+    
+    # Ensure temporal batchnorm used for cascaded mode
+    args.bn_time_stats = True
   return args
 
 
@@ -222,6 +225,10 @@ def setup_dataset(args):
 
 
 def setup_model(data_handler, device, args, save_root=""):
+  imagenet_pretrained = (
+    args.dataset_name == "ImageNet2012" 
+    and args.use_imagenet_pretrained_weights
+  )
   # Model
   model_dict = {
       "seed": args.random_seed,
@@ -240,7 +247,7 @@ def setup_model(data_handler, device, args, save_root=""):
           "temporal_stats": args.bn_time_stats,
       },
       "imagenet": args.dataset_name == "ImageNet2012",
-      "imagenet_pretrained": args.dataset_name == "ImageNet2012" and args.use_imagenet_pretrained_weights,
+      "imagenet_pretrained": imagenet_pretrained,
       "n_channels": 1 if args.dataset_name == "FashionMNIST" else 3
   }
 
@@ -303,18 +310,20 @@ def condition_model(save_root, args):
   # Check mode and load optimizer
   if (args.train_mode == "ic_only" 
       or (args.train_mode in ["sdn", "cascaded"] and args.use_pretrained_weights)):
-    baseline_ckpt_path = get_baseline_ckpt_path(save_root, args)
-    assert os.path.exists(baseline_ckpt_path), (
-        f"Path does not exist: {baseline_ckpt_path}")
-    print(f"Loading baseline for ic_only from {baseline_ckpt_path}")
-    checkpoint = torch.load(baseline_ckpt_path)
-    model_state_dict = checkpoint["model"]
-    
-    # Fix model dict
-    fixed_dict = fix_dict(model_state_dict, args)
-    
-    # Load dict
-    net.load_state_dict(fixed_dict, strict=False)
+
+    if not args.use_imagenet_pretrained_weights:
+      baseline_ckpt_path = get_baseline_ckpt_path(save_root, args)
+      assert os.path.exists(baseline_ckpt_path), (
+          f"Path does not exist: {baseline_ckpt_path}")
+      print(f"Loading baseline for ic_only from {baseline_ckpt_path}")
+      checkpoint = torch.load(baseline_ckpt_path)
+      model_state_dict = checkpoint["model"]
+      
+      # Fix model dict
+      fixed_dict = fix_dict(model_state_dict, args)
+      
+      # Load dict
+      net.load_state_dict(fixed_dict, strict=False)
     
     # Set handler params
     if args.train_mode == "ic_only":
@@ -382,15 +391,14 @@ def main(args):
   )
 
   # Setup output directory
-  #save_root = setup_output_dir(args)
+  save_root = setup_output_dir(args)
 
   # Setup dataset loaders
   data_handler, loaders = setup_dataset(args)
   
   # Setup model
-  save_root = ""
   net = setup_model(data_handler, device, args, save_root=save_root)
-
+  
   # Condition model and get handler opts
   opts = condition_model(save_root, args)
   

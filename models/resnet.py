@@ -106,6 +106,7 @@ class ResNet(nn.Module):
 
   def _setup_bn_op(self, **kwargs):
     if self._cascaded and self._time_bn:
+      print("BatchNorm OP: Temporal")
       self._norm_layer = custom_ops.BatchNorm2d
 
       # Setup batchnorm opts
@@ -113,6 +114,7 @@ class ResNet(nn.Module):
       self.bn_opts["n_timesteps"] = self.timesteps
       norm_layer_op = functools.partial(self._norm_layer, self.bn_opts)
     else:
+      print("BatchNorm OP: Standard")
       self._norm_layer = nn.BatchNorm2d
       norm_layer_op = self._norm_layer
 
@@ -269,7 +271,7 @@ def make_resnet(arch, block, layers, pretrained, **kwargs):
     for k, v in state_dict.items():
       if ".0.downsample.1" in k:
         continue
-        
+      
       # Prepend layer0 to head layer to match our code
       if k.startswith("conv1") or k.startswith("bn1"):
         k = f"layer0.{k}"
@@ -281,10 +283,13 @@ def make_resnet(arch, block, layers, pretrained, **kwargs):
         k = f"fc.{k}"
       
       # Inflate batch norm along time dimension if cascaded model
-      if kwargs["cascaded"] and "running_" in k:
+      if kwargs["cascaded"] and kwargs["bn_opts"]["temporal_stats"] and "running_" in k:
         v = v.unsqueeze(dim=0).repeat(model.timesteps, 1)
+        # print(f"Inflating {k} to new shape: {v.shape}")
+      
+      # Update dict
       new_dict[k] = v
-    
+      
     # Load imagenet state dict into our model
     model.load_state_dict(new_dict)
     print("Success: Loaded pretrained state dict!")
