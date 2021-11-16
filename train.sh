@@ -9,8 +9,8 @@ DATASET_NAME="ImageNet2012"  # CIFAR10, CIFAR100, TinyImageNet, ImageNet2012
 EXPERIMENT_NAME="${MODEL}_${DATASET_NAME}"
 
 # Model params
-TRAIN_MODE="baseline"  # baseline, cascaded
-CASCADED_SCHEME="serial"  # serial, parallel
+TRAIN_MODE="cascaded"  # baseline, cascaded
+CASCADED_SCHEME="parallel"  # serial, parallel
 MULTIPLE_FCS=false
 USE_PRETRAINED_IMAGENET_WEIGHTS=true
 
